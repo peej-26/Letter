@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>A letter for you</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lora:ital,wght@0,400;1,400&display=swap">
+<style>
+:root{
+  --bg:#3a0d16; --bg2:#5c1424; --paper:#fdf7f5; --ink:#3a1620; --accent:#b3273e; --env:#f3dede; --env-dark:#e0b9bd;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){ color-scheme:dark; }
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 50% 15%,var(--bg2),var(--bg) 70%); background-color:var(--bg);
+  font-family:'Lora',Georgia,serif; color:var(--ink); padding:24px 16px; position:relative; overflow-x:hidden;
+}
+
+/* soft rose silhouettes drifting in the background */
+.rose-bg{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+.rose-bg svg{position:absolute; opacity:.16}
+.rose-bg .r1{width:180px; top:-30px; left:-40px; transform:rotate(-15deg)}
+.rose-bg .r2{width:150px; bottom:-20px; right:-30px; transform:rotate(20deg)}
+.rose-bg .r3{width:110px; top:40%; right:8%; transform:rotate(-8deg); opacity:.10}
+
+.hint{color:#f3dede; font-family:'Caveat',cursive,sans-serif; font-size:1.5rem; margin:0 0 20px; text-align:center; transition:opacity .4s; position:relative; z-index:1}
+.opened .hint{opacity:0; height:0; margin:0; overflow:hidden}
+
+.envelope{
+  position:relative; z-index:1; width:min(320px,86vw); aspect-ratio:3/2; border:0; padding:0; cursor:pointer;
+  background:var(--env); border-radius:6px; box-shadow:0 20px 40px rgba(0,0,0,.4);
+  transition:transform .6s ease, opacity .6s ease .5s;
+}
+.envelope:focus-visible{outline:3px solid var(--accent); outline-offset:6px}
+.envelope::before{
+  content:""; position:absolute; inset:0; border-radius:6px;
+  background:linear-gradient(to top right,var(--env-dark) 49.5%,transparent 50%) left/50% 100% no-repeat,
+             linear-gradient(to top left,var(--env-dark) 49.5%,transparent 50%) right/50% 100% no-repeat;
+}
+.flap{
+  position:absolute; top:0; left:0; width:100%; height:62%; background:var(--env-dark);
+  clip-path:polygon(0 0,100% 0,50% 100%); transform-origin:top; transition:transform .6s ease, z-index 0s .3s;
+  z-index:2; border-radius:6px 6px 0 0;
+}
+.seal{
+  position:absolute; left:50%; top:52%; width:48px; height:48px; margin:-24px 0 0 -24px; z-index:3;
+  border-radius:50%; background:var(--accent); color:#fff; display:grid; place-items:center;
+  box-shadow:0 3px 8px rgba(0,0,0,.35); transition:opacity .3s;
+}
+.seal svg{width:26px; height:26px}
+.opened .flap{transform:rotateX(180deg); z-index:0}
+.opened .seal{opacity:0}
+.opened .envelope{transform:translateY(40px) scale(.9); opacity:0; pointer-events:none; position:absolute}
+
+.letter{
+  position:relative; z-index:1;
+  width:min(560px,100%); background:var(--paper); border-radius:4px; padding:44px 40px 40px;
+  box-shadow:0 24px 50px rgba(0,0,0,.45); display:none;
+  background-image:repeating-linear-gradient(transparent 0 33px,rgba(179,39,62,.10) 33px 34px);
+  background-position:0 20px;
+}
+.opened .letter{display:block; animation:rise .9s ease both}
+@keyframes rise{from{opacity:0; transform:translateY(60px)} to{opacity:1; transform:none}}
+.letter p{margin:0 0 17px; line-height:34px; font-size:1.05rem; max-width:62ch}
+.letter .greet,.letter .sign{font-family:'Caveat',cursive,sans-serif; font-size:2rem; line-height:1.2; color:var(--accent)}
+.letter .greet{margin-bottom:20px}
+.letter .sign{margin:12px 0 0; text-align:right}
+
+.photo-wrap{margin:8px 0 22px; text-align:center}
+.photo-wrap img{
+  max-width:100%; width:260px; border-radius:2px; border:8px solid #fff;
+  box-shadow:0 10px 24px rgba(0,0,0,.25); transform:rotate(-1.5deg); display:block; margin:0 auto;
+}
+.photo-caption{font-family:'Caveat',cursive,sans-serif; font-size:1.3rem; color:var(--accent); margin:8px 0 0}
+
+.again{
+  position:relative; z-index:1;
+  margin-top:22px; background:none; border:1px solid #f3dede; color:#f3dede; border-radius:999px;
+  padding:8px 18px; font:inherit; cursor:pointer; display:none;
+}
+.opened .again{display:inline-block}
+.again:hover{background:rgba(255,255,255,.1)}
+.again:focus-visible{outline:3px solid var(--accent); outline-offset:3px}
+@media (max-width:480px){.letter{padding:32px 22px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important; animation:none!important}}
+</style>
+</head>
+<body>
+
+<!-- decorative rose line-art, drawn as inline SVG (no external images) -->
+<div class="rose-bg" aria-hidden="true">
+  <svg class="r1" viewBox="0 0 100 100" fill="none" stroke="#f3dede" stroke-width="1.4"><path d="M50 30c-8-10-22-8-22 3 0 10 12 16 22 24 10-8 22-14 22-24 0-11-14-13-22-3z"/><path d="M50 57v35M50 70c-9 0-14 6-14 6M50 80c9 0 15 6 15 6"/></svg>
+  <svg class="r2" viewBox="0 0 100 100" fill="none" stroke="#f3dede" stroke-width="1.4"><path d="M50 30c-8-10-22-8-22 3 0 10 12 16 22 24 10-8 22-14 22-24 0-11-14-13-22-3z"/><path d="M50 57v35M50 70c-9 0-14 6-14 6M50 80c9 0 15 6 15 6"/></svg>
+  <svg class="r3" viewBox="0 0 100 100" fill="none" stroke="#f3dede" stroke-width="1.4"><path d="M50 30c-8-10-22-8-22 3 0 10 12 16 22 24 10-8 22-14 22-24 0-11-14-13-22-3z"/><path d="M50 57v35M50 70c-9 0-14 6-14 6M50 80c9 0 15 6 15 6"/></svg>
+</div>
+
+<main id="app">
+  <p class="hint">You have a letter. Tap to open.</p>
+  <button class="envelope" id="env" aria-label="Open the letter">
+    <span class="flap"></span>
+    <span class="seal">
+      <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4"><path d="M50 32c-9-11-24-9-24 3 0 11 13 17 24 26 11-9 24-15 24-26 0-12-15-14-24-3z"/><path d="M50 61v22M50 72c-8 0-12 5-12 5M50 79c8 0 13 5 13 5"/></svg>
+    </span>
+  </button>
+
+  <!-- ✏️ EDIT THE LETTER BELOW -->
+  <article class="letter" id="letter">
+    <p class="greet">Dear [Her name],</p>
+    <p>I wanted to write this down properly, because some things deserve more than a quick text.</p>
+
+    <!-- ✏️ PHOTO: replace "your-photo.jpg" with your image file's name (keep it in the same folder as this html file), or paste a base64 data URI. Delete this whole .photo-wrap block if you don't want a photo. -->
+    <div class="photo-wrap">
+      <img src="your-photo.jpg" alt="A photo of us">
+      <p class="photo-caption">[optional caption, e.g. "that weekend in the mountains"]</p>
+    </div>
+
+    <p>Thank you for the way you laugh at my worst jokes, for the little moments you make feel easy, and for being someone I can be completely myself around.</p>
+    <p>[Add a favorite memory here. Where were you, what happened, why does it stay with you?]</p>
+    <p>You make ordinary days better. I'm grateful for you today, and I'm looking forward to everything ahead of us.</p>
+    <p class="sign">Yours always,<br>[Your name]</p>
+  </article>
+
+  <button class="again" id="again">Read it again</button>
+</main>
+<script>
+  var app = document.getElementById('app');
+  var env = document.getElementById('env');
+  var letter = document.getElementById('letter');
+  env.addEventListener('click', function () {
+    env.setAttribute('aria-expanded', 'true');
+    setTimeout(function () { app.classList.add('opened'); letter.setAttribute('tabindex', '-1'); letter.focus({preventScroll:true}); }, 500);
+    app.classList.add('opening');
+    env.querySelector('.flap').style.transform = 'rotateX(180deg)';
+    env.querySelector('.seal').style.opacity = '0';
+  });
+  document.getElementById('again').addEventListener('click', function () {
+    app.classList.remove('opened', 'opening');
+    var f = env.querySelector('.flap'); f.style.transform = ''; env.querySelector('.seal').style.opacity = '';
+    env.removeAttribute('aria-expanded');
+    window.scrollTo(0, 0);
+  });
+</script>
+</body>
+</html>
